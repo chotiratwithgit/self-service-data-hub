@@ -17,12 +17,18 @@ st.set_page_config(
 load_dotenv()
 
 
+def get_secret(name: str) -> str | None:
+    if name in st.secrets:
+        return st.secrets[name]
+    return os.getenv(name)
+
+
 @st.cache_data
 def get_brewery_data():
-    db_url = os.getenv("SUPABASE_DB_URL")
+    db_url = get_secret("SUPABASE_DB_URL")
 
     if not db_url:
-        st.error("ไม่พบ SUPABASE_DB_URL ใน .env")
+        st.error("ไม่พบ SUPABASE_DB_URL ใน Streamlit secrets หรือ environment variables")
         return pd.DataFrame()
 
     engine = create_engine(db_url)
