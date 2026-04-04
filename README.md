@@ -2,6 +2,10 @@
 
 Streamlit dashboard for exploring brewery data from Supabase PostgreSQL. This repository is set up to be deployed on Streamlit Cloud.
 
+## Live App
+
+Streamlit Cloud: https://self-service-data-app-kitro2weh5hfwvnn9kruli.streamlit.app/
+
 ## What It Does
 
 - Shows a high-level brewery overview
