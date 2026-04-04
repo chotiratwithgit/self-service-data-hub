@@ -28,7 +28,11 @@ def get_brewery_data():
     db_url = get_secret("SUPABASE_DB_URL")
 
     if not db_url:
-        st.error("ไม่พบ SUPABASE_DB_URL ใน Streamlit secrets หรือ environment variables")
+        st.error("ไม่พบ SUPABASE_DB_URL")
+        st.info(
+            "บน Streamlit Cloud ให้เพิ่มค่าใน App Settings > Secrets โดยใส่บรรทัด "
+            '`SUPABASE_DB_URL = "postgresql://..."`'
+        )
         return pd.DataFrame()
 
     engine = create_engine(db_url)
@@ -42,6 +46,9 @@ st.title("🏢 Brewery Data Portal")
 st.markdown("ระบบศูนย์กลางข้อมูลสำหรับการวิเคราะห์และปฏิบัติการ (Self-Service Analytics)")
 
 df_breweries = get_brewery_data()
+
+if df_breweries.empty:
+    st.stop()
 
 required_columns = ["id", "brewery_name", "brewery_type", "city", "state_name", "country"]
 missing_columns = [col for col in required_columns if col not in df_breweries.columns]

@@ -1,33 +1,25 @@
 # Self-Service Data Hub
 
-A Streamlit dashboard for internal team use, built to connect to brewery data stored in Supabase PostgreSQL. The app allows users to explore data, run standard reports, download filtered datasets, and review data quality issues from a single interface.
+Streamlit dashboard for exploring brewery data from Supabase PostgreSQL. This repository is set up to be deployed on Streamlit Cloud.
 
-## Overview
+## What It Does
 
-This project is designed as a self-service analytics tool to reduce ad hoc data requests. Team members can use the dashboard to:
-
-- View high-level brewery dataset summaries
-- Search and filter data by `brewery_type` and `state_name`
-- Download filtered data as CSV
-- Use standard saved reports
-- Review records with data quality issues
-- Monitor pipeline and application health
+- Shows a high-level brewery overview
+- Lets users filter and search brewery records
+- Supports CSV download of filtered data
+- Includes saved report views
+- Highlights data quality issues
+- Shows simple pipeline health metrics
 
 ## Data Source
 
-The app connects to Supabase PostgreSQL using SQLAlchemy and reads the database connection string from an environment variable:
-
-```env
-SUPABASE_DB_URL=postgresql://postgres:YOUR_PASSWORD@db.xxxxx.supabase.co:5432/postgres
-```
-
-Current source table:
+The app queries this table:
 
 ```sql
 SELECT * FROM dbt_chotiratwithgit_public.stg_breweries
 ```
 
-Expected schema:
+Expected columns:
 
 - `id`
 - `brewery_name`
@@ -36,152 +28,57 @@ Expected schema:
 - `state_name`
 - `country`
 
-## App Features
+## Deploy On Streamlit Cloud
 
-### 1. Executive Overview
+### 1. Push this repository to GitHub
 
-Provides a summary of the brewery dataset, including:
+Make sure these files are present:
 
-- Total brewery count
-- Number of brewery types
-- Number of states covered
-- Number of countries covered
-- Breweries by type chart
-- Top states chart
-- Top cities table
+- `app.py`
+- `requirements.txt`
+- `README.md`
 
-### 2. Data Explorer
+Do not commit secret files such as `.env` or `.streamlit/secrets.toml`.
 
-Designed for internal users who want to explore data directly:
+### 2. Create the app in Streamlit Cloud
 
-- Filter by `brewery_type`
-- Filter by `state_name`
-- Search by `brewery_name`
-- Preview filtered results in a table
+In Streamlit Cloud:
 
-### 3. Data Download
+1. Click `New app`
+2. Select this GitHub repository
+3. Set the main file path to `app.py`
+4. Deploy
 
-Allows users to export filtered records:
+### 3. Add app secrets
 
-- Select columns to export
-- Preview export data before download
-- Download filtered data as CSV
+After the app is created, open:
 
-### 4. Saved Reports
+`App settings` > `Secrets`
 
-Provides standard recurring reports:
+Add:
 
-- Breweries by type
-- Breweries by state
-- Top cities by brewery count
-
-### 5. Quarantine
-
-Performs basic data quality checks such as:
-
-- Missing ID
-- Missing Brewery Name
-- Missing Brewery Type
-- Missing City
-- Missing State Name
-- Missing Country
-- Duplicate ID
-
-### 6. Pipeline Health
-
-Displays simple monitoring information:
-
-- Total records
-- Valid records
-- Quarantine records
-- Last refresh timestamp
-- Basic system logs
-
-## Tech Stack
-
-- `Streamlit`
-- `Pandas`
-- `SQLAlchemy`
-- `psycopg2-binary`
-- `python-dotenv`
-- `Supabase PostgreSQL`
-
-## Project Structure
-
-```text
-Streamlit (Data App)/
-|-- app.py
-|-- requirements.txt
-|-- run_app.ps1
-|-- .gitignore
-|-- README.md
-```
-
-## Local Setup
-
-### 1. Create and activate a virtual environment
-
-Example using Python 3.13:
-
-```powershell
-python -m venv .venv313
-.\.venv313\Scripts\Activate.ps1
-```
-
-### 2. Install dependencies
-
-```powershell
-pip install -r requirements.txt
-```
-
-If `pip` is not available inside the virtual environment, install packages directly with Python 3.13:
-
-```powershell
-C:\Users\ADMIN\AppData\Local\Programs\Python\Python313\python.exe -m pip install -r requirements.txt --target .\.venv313\Lib\site-packages
-```
-
-### 3. Create `.env`
-
-Create a `.env` file in the project root:
-
-```env
-SUPABASE_DB_URL=postgresql://postgres:YOUR_PASSWORD@db.xxxxx.supabase.co:5432/postgres
+```toml
+SUPABASE_DB_URL = "postgresql://postgres:YOUR_PASSWORD@HOST:PORT/postgres"
 ```
 
 Notes:
 
-- Do not commit `.env` to GitHub
-- The connection string must point to a database containing `dbt_chotiratwithgit_public.stg_breweries`
+- The key name must be exactly `SUPABASE_DB_URL`
+- Do not wrap the whole file in JSON
+- Save the secrets and reboot the app after updating them
 
-### 4. Run the app
+### 4. Confirm database access
 
-Run through PowerShell:
+The connection string must point to a Supabase PostgreSQL instance that contains:
 
-```powershell
-.\run_app.ps1
-```
+- schema: `dbt_chotiratwithgit_public`
+- table: `stg_breweries`
 
-Or run directly:
-
-```powershell
-.\.venv313\Scripts\python.exe -m streamlit.web.cli run app.py
-```
-
-If you are using another environment with `streamlit.exe`:
-
-```powershell
-.\.venv\Scripts\streamlit.exe run app.py
-```
-
-Then open:
-
-```text
-http://localhost:8501
-```
+If the secret is missing, the app will stop and show a setup message on screen.
 
 ## Requirements
 
-Current dependencies in `requirements.txt`:
+Dependencies from `requirements.txt`:
 
 ```txt
 streamlit
@@ -192,19 +89,47 @@ psycopg2-binary
 supabase
 ```
 
-Note: the current app primarily uses SQLAlchemy to read from Supabase PostgreSQL. The `supabase` package is included but is not currently used directly in `app.py`.
+`python-dotenv` is kept for optional local development, but Streamlit Cloud uses `st.secrets` for production deployment.
 
-## Notes
+## Local Development
 
-- This repository is intended for internal team usage
-- If the database schema changes, update the column references in `app.py`
-- If `SUPABASE_DB_URL` is missing, the app will not be able to connect to the database
-- If the table or schema name changes, update the SQL query inside `get_brewery_data()`
+Local run is optional. If needed, create a `.env` file in the project root:
 
-## Future Improvements
+```env
+SUPABASE_DB_URL=postgresql://postgres:YOUR_PASSWORD@HOST:PORT/postgres
+```
 
-- Add global filters shared across all tabs
-- Add refresh metadata and load timestamps
-- Support Excel export
-- Add more interactive charts
-- Add deployment and access-control options for internal users
+Then run:
+
+```powershell
+streamlit run app.py
+```
+
+## Troubleshooting
+
+### App says `SUPABASE_DB_URL` is missing
+
+Check that:
+
+- the secret is added in Streamlit Cloud
+- the key name is exactly `SUPABASE_DB_URL`
+- the app was rebooted after saving secrets
+
+### App deploys but cannot query data
+
+Check that:
+
+- the database URL is valid
+- the database is reachable from Streamlit Cloud
+- the target table exists
+- the expected columns still exist
+
+## Security
+
+- Never commit `.env`
+- Never commit `.streamlit/secrets.toml`
+- If a real credential was committed previously, rotate it in Supabase
+
+## Next Phase
+
+The next phase of this project will focus on data governance to improve data quality, accountability, and trust across the platform.
